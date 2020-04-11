@@ -1,4 +1,4 @@
-baseURL = "https://itwenty.netlify.com/"
+baseURL = "https://itwenty.me"
 languageCode = "en-us"
 title = "iTwenty's space"
 theme = "hello-friend-ng"
