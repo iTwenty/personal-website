@@ -177,7 +177,7 @@ Knowing this, we can now change the install path in Animal dylib from `libCat.dy
 ❯❯❯❯ install_name_tool -change libCat.dylib @loader_path/../libCat.dylib Animal/libAnimal.dylib
 ```
 
-Running `main` will now succeed from any directory. In fact, if you were to add a new executable `foo/main` that depends on `libAnimal`, you would only need to set the install path for `libAnimal.dylib` in `foo/main` itself.[^third_party_dylibs] No change is needed to either `libCat` or `libAnimal` as long as relative path between them remains the same, but that is unavoidable. They are now "shared libraries" in true sense of the word.
+Running `main` will now succeed from any directory. In fact, if you were to add a new executable `foo/main` that depends on `libAnimal`, you would only need to set the install path for `libAnimal.dylib` in `foo/main` itself[^third_party_dylibs]. No change is needed to either `libCat` or `libAnimal` as long as relative path between them remains the same, but that is unavoidable. They are now "shared libraries" in true sense of the word.
 
 > **NOTE** : For executables, `@loader_path` and `@executable_path` mean the same thing.
 
@@ -227,7 +227,7 @@ For `Animal/libAnimal.dylib` this works out to `@rpath/Animal/libAnimal.dylib`
 ❯❯❯❯ install_name_tool -id @rpath/Animal/libAnimal.dylib Animal/libAnimal.dylib
 ```
 
-- Next, let's add an `@rpath` to our executables with value equal to `@loader_path/zzz` where zzz is relative path from executable to our anchor.
+Next, let's add an `@rpath` to our executables with value equal to `@loader_path/zzz` where zzz is relative path from executable to our anchor.
 
 For `foo/main.c` this works out to `@loader_path/../`
 
@@ -257,7 +257,7 @@ dyld: Library not loaded: @rpath/TestKit.framework/TestKit
 
 The executable is `<long_path_name>/TestApp.app/TestApp`. Dylib is `TestKit`. The executable could not find the dylib at `@rpath/TestKit.framework/TestKit`.
 
-For iOS apps, all third party frameworks reside inside a `Frameworks` directory inside app directory. So the actual path to dylib is `<long_path_name>/TestApp.app/Frameworks/TestKit.framework/TestKit`. The anchor directory is `<long_path_name>/TestApp.app/`. So to figure out the reason for this error, we can check two things -
+For iOS apps, all third party frameworks reside inside a `Frameworks` directory inside app directory. So the actual path to dylib is `<long_path_name>/TestApp.app/Frameworks/TestKit.framework/TestKit`. The anchor directory is `<long_path_name>/TestApp.app/Framewoks/`. So to figure out the reason for this error, we can check two things -
 
 - `<long_path_name>/TestApp.app/TestApp` has `@rpath` value of `@loader_path/Frameworks/`. `@executable_path/Frameworks/` works too since both mean the same thing for executables. If you have the source code, you can check this in target's build settings (`LD_RUNPATH_SEARCH_PATHS`). If not, `otool -l` is your friend.
 - `TestKit` dylib has install ID of `@rpath/TestKitFramework.framework/TestKit`.  If you have the source, check this in build settings (`LD_DYLIB_INSTALL_NAME`). If not, `otool -l` is your friend again.
@@ -274,4 +274,4 @@ When you add a new framework to an app, Xcode takes care of all this settings fo
 
 [^third_party_dylibs]: For any client, having correct install paths to all dylibs it depends on is unavoidable, unless the dylib is present at a standard location like `/usr/lib/`.
 
-[^client]: Client can mean either an executable or a dylib.
+[^clients]: Client can mean either an executable or a dylib.
