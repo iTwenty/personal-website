@@ -3,6 +3,9 @@ languageCode = "en-us"
 theme = "hello-friend"
 paginate = 5
 
+[permalinks]
+  posts = "/:year/:month/:title/"
+
 [params]
   # dir name of your blog content (default is `content/posts`).
   # the list of set content will show up on your index page (baseurl).
@@ -28,7 +31,6 @@ paginate = 5
 [languages]
   [languages.en]
     title = "iTwenty's Space"
-    subtitle = "A simple theme for Hugo"
     keywords = ""
     copyright = ""
     menuMore = "Show more"
