@@ -35,7 +35,7 @@ The actual memory footprint of a struct is a multiple of alignment, rather than 
 
 Visually, multiple instances of TestStruct in an array `a` would look something like this in memory -
 
-
+{{< img src="struct_memory_layout.png" alt="Struct Memory Layout" >}}
 
 ### Memory related APIs.
 Swift provides access to pointers in a type safe way. 
