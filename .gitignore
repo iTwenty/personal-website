@@ -11,5 +11,8 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
+# Node modules
+node_modules/
+
 # OSX
 .DS_Store
