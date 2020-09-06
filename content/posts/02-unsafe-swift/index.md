@@ -144,7 +144,7 @@ withUnsafePointer(to: a[1]) { (ptr) in
 }
 ```
 
-How come two distincy array elements have the same memory address? Reason is, arrays in Swift are not pure value types. They are actually reference types that masquerade as value types. The reason for this warrants a new blog post in itself (look up Copy on Write if you are curious). If you wish to use pointers to arrays, it's best to the instance methods `withUnsafeBytes()` and `withUnsafeBufferPointer` rather than the global methods.
+How come two distinct array elements have the same memory address? Arrays in Swift are not pure value types, but reference types that masquerade as value types. The reason for this warrants a new blog post in itself (look up Copy on Write if you are curious). If you wish to use pointers to arrays, it's best to use instance methods `withUnsafeBytes()` and `withUnsafeBufferPointer()` rather than the global methods.
 
 ```swift
 var a = [
@@ -161,5 +161,3 @@ a.withUnsafeBufferPointer { (ptr) in
     print((base + 1).pointee)   // a[1]
 }
 ```
-
-<center> END </center>
