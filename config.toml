@@ -15,10 +15,10 @@ paginate = 5
   defaultTheme = "dark"
 
   # if you set this to 0, only submenu trigger will be visible
-  showMenuItems = 1
+  showMenuItems = 4
 
   # Show reading time in minutes for posts
-  showReadingTime = true
+  showReadingTime = false
 
   # Show table of contents at the top of your posts (defaults to false)
   # Alternatively, add this param to post front matter for specific posts
@@ -55,6 +55,16 @@ paginate = 5
 
     [languages.en.menu]
       [[languages.en.menu.main]]
-        identifier = "Blog"
+        identifier = "Posts"
         name = "/posts"
         url = "/posts"
+
+      [[languages.en.menu.main]]
+        identifier = "About"
+        name = "/about"
+        url = "/about"
+
+      [[languages.en.menu.main]]
+        identifier = "Projects"
+        name = "/projects"
+        url = "/projects"
