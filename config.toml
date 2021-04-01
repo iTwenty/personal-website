@@ -68,3 +68,8 @@ paginate = 5
         identifier = "Projects"
         name = "/projects"
         url = "/projects"
+
+      [[languages.en.menu.main]]
+        identifier = "Blender"
+        name = "/blender"
+        url = "/blender"
