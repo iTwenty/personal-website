@@ -5,14 +5,14 @@ draft: false
 ---
 
 ---------
+## Brahmaand
+#### [GitHub](https://github.com/iTwenty/Brahmaand)
+iOS app to browse [APODs](https://apod.nasa.gov/). There are already dozens of similar apps in the App Store, but none that I tried provided support for browsing APODs with left/right swipes. This one does. As a bonus, it also allows you to mark APODs as favorites, which are displayed separately from daily APODs.
+
+---------
 ## Hashtagger
 #### [GitHub](https://github.com/iTwenty/Hashtagger)
 Android app that ***used to*** search for any hashtag across Twitter, Facebook and Google Plus simultaneously. Worked great in it's glory days, but then Google decided to [kill Google Plus](https://gcemetery.co/google-plus/) and Facebook removed the search API the app relied on. Such is life :(
-
----------
-## Fair Dice
-#### [GitHub](https://github.com/iTwenty/Fair-Dice)
-iOS app that simulates *fair* dice rolls. Frustrated with the frequency of robber rolls in Catan, I decided to create this app on a whim. Removes the frustration while preserving the element of randomness in dice rolls.
 
 ---------
 ## PasswordEditText
