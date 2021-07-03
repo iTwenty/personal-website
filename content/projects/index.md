@@ -1,5 +1,5 @@
 ---
-title: "Pesonal Projects"
+title: "Personal Projects"
 date: 2021-03-22T16:49:43+05:30
 draft: false
 ---
