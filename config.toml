@@ -1,6 +1,6 @@
 baseurl = "https://itwenty.me"
 languageCode = "en-us"
-theme = "hello-friend"
+theme = ["hello-friend", "hugo-shortcode-gallery"]
 paginate = 5
 
 [permalinks]

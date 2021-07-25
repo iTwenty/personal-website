@@ -1,6 +1,5 @@
 ---
 title: "Personal Projects"
-date: 2021-03-22T16:49:43+05:30
 draft: false
 ---
 
@@ -14,7 +13,7 @@ iOS app to browse [APODs](https://apod.nasa.gov/). There are already dozens of s
 ---------
 ## Hashtagger
 #### [GitHub](https://github.com/iTwenty/Hashtagger)
-Android app that ***used to*** search for any hashtag across Twitter, Facebook and Google Plus simultaneously. Worked great in it's glory days, but then Google decided to [kill Google Plus](https://gcemetery.co/google-plus/) and Facebook removed the search API the app relied on. Such is life :(
+Android app that *used to* search for any hashtag across Twitter, Facebook and Google Plus simultaneously. Worked great in it's glory days, but then Google decided to [kill Google Plus](https://gcemetery.co/google-plus/) and Facebook removed the search API the app relied on. Such is life.
 
 [{{<figure src="Hashtagger_sm.jpg" alt="Hashtagger" position="center" style="border-radius: 8px;">}}](Hashtagger.jpg)
 
