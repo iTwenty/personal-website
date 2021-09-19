@@ -1,7 +1,7 @@
 ---
 title: "Test Post"
 date: 2020-04-11T09:49:34+05:30
-draft: false 
+draft: true 
 toc: false
 images:
 tags:
