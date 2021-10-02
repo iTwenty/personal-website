@@ -49,7 +49,7 @@ while let value = doublingIterator.next() {
 A simple iterator that doubles it's value each time `next()` is called. If we omit the `limit` parameter in constructor, the iterator will keep doubling values forever.
 
 ### Sequence
-A type that provides sequential, iterated access to its elements. A sequence is a list of values that we can step through one at a time. While seemingly simple, this capability gives us access to a large number of operations that we can perform on any sequence. The Sequence protocol provides default implementations for many common operations that depend on sequential access to a sequence's values. Before looking at these operations, let's look at the protocol definition -
+A type that provides sequential, iterated access to its elements. A sequence is a list of values that we can step through one at a time. While seemingly simple, this capability gives us access to a large number of operations that we can perform on any sequence. The Sequence protocol provides default implementations for many of these common operations. Before looking at these operations, let's look at the protocol definition -
 
 ```swift
 public protocol Sequence {
@@ -86,6 +86,8 @@ Just by conforming to Sequence, our concrete type has gained the ability to be u
 There are a couple of things to be aware of while using Sequences -
 1. Sequence makes no guarantees about multiple iterations producing desired results. It is up to the implementing type to decide how to handle iterating over an sequence that has already been iterated over once.
 2. Sequence should provide it's iterator in O(1). It makes no other requirements about element access. So methods that traverse a sequence should be considered O(n) unless documented otherwise.
+
+Given an element, Sequence lets us move to next element. To be able to move to any element (no guarantees of the move being constant time though), we need Collection.
 
 ### Collection
 A sequence whose elements can be traversed multiple times, nondestructively, and accessed by an indexed subscript. When we use arrays, dictionaries or sets, we benefit from the operations that the Collection protocol declares and implements. In addition to the operations that collections inherit from the Sequence protocol, we gain access to methods that depend on accessing an element at a specific position in a collection. The minimum protocol definition for Collection looks like this - 
@@ -214,6 +216,8 @@ Since the return type for Sequence implementation differs from the Bidirectional
 
 {{<figure src="reversed_autocomplete.png" alt="Reversed autocomplete" caption="Two implementations of reversed()" position="center" style="border-radius: 8px;">}}
 
+We can now move through our FunkyArray from both ends. But we can't yet change the value at any given Index. That functionality is provided by MutableCollection.
+
 ### MutableCollection
 If we try to modify any value in FunkyArray using subscript, things will crash and burn[^compiler_crash]. Collection only gives us subscript read access to it's elements. To unlock write access, we need to conform to MutableCollection. Protocol definition is simple -
 
@@ -255,6 +259,8 @@ print(funkyArray) // 1, 2, 4, 8, 16, 64
 
 MutableCollection seems like a simple addition, but it gives us access to useful methods like `swapAt(_:_:)` for swapping elements at two indices and `reverse()` for in-place reversal. One thing to be aware of while implementing MutableCollection is that subscript assignment should not change the length of the Collection itself. This is the reason why Strings don't conform to MutableCollection. Replacing a Character with another using subscript can change the length of String as Character itself doesn't have a fixed length. The length constraint is also the reason why MutableCollection doesn't provide methods like `remove(_:)`, `append(_:)`, `insert(_:at:)` etc which we typically associate with the word "mutable".
 
+Remember how Collection enabled us to move to any element using Index, but made no guarantees of the move being constant time? RandomAccessCollection is the protocol which gives us this guarantee.
+
 ### RandomAccessCollection
 A collection that supports efficient random access index traversal. RandomAccessCollections can move indices any distance and measure the distance between indices in O(1) time. Therefore, the fundamental difference between random access and bidirectional collections is that operations that depend on index movement or distance measurement offer significantly improved efficiency. The protocol definition is as simple as it gets -
 
@@ -270,6 +276,8 @@ extension FunkyArray: RandomAccessCollection { }
 ```
 
 Conforming to RandomAccessCollection doesn't unlock a lot in terms of functionality, but it does improve performance of certain existing algorithms like `dropFirst(_:)`, `dropLast(_:)`, `prefix(_:)`, `suffix(_:)` which become O(1) operations now. Most importantly, `count` property is guaranteed to be O(1) instead of (possibly) requiring iteration of an entire collection. If our RandomAccessCollection also conforms to MutableCollection, we gain access to in-place `sort()` and `shuffle()` methods as well.
+
+Speaking of MutableCollections, our FunkyArray - despite being a mutable collection - still cannot do length changing operations like ``insert(_:at:)``. Such operations require conformance to RangeReplaceableCollection.
 
 ### RangeReplaceableCollection
 A collection that does what it says. RangeReplaceableCollection supports replacement of an arbitrary subrange of elements with elements of another collection. This sounds a bit like MutableCollection, but the key difference here is that the new collection need not have same length as the one being replaced. Protocol definition is simple -
@@ -310,6 +318,10 @@ Since RangeReplaceableCollections can modify the length of Collection, Strings c
 Despite having a number of Collection protocols fine tuned for very specific constraints, things are far from perfect. Case in point being unordered collections like Sets and Dictionaries. Sets conform to Collection, which gives them access to methods like `firstIndex(of:)`, `subscript { get }` etc. This method makes no sense for an unordered Collection like Set. But I guess the benefits of conforming to Collection outweighed having a few API inconsistencies. Majority of set operations are implemented in Set type directly, or in SetAlgebra type which sits outside the Collection protocols we discussed in this post.
 
 Dictionaries conform to Collection as well. Based on the way you access a value using key as subscript, you would expect the Index to be of key's type and Element to be of value's type. However, dictionaries actually use an internal type for their Index and their Element type is a tuple (Key, Value). A look a Dictionary's code shows that there are actually two subscripts, [one](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/Dictionary.swift#L708) based on the internal Index to satisfy Collection protocol requirements and [another](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/Dictionary.swift#L784) using Key which we are familiar with.
+
+### References
+- [harshil.net](https://harshil.net/blog/swift-sequence-collection-array) - Inspiration behind this post.
+- [Swift source code](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core) - Swift stdlib is surprisingly well commented and readable.
 
 ---
 [^compiler_crash]: In my testing, I found that conforming to MutableCollection without making subscript settable did not throw any compile time errors, but caused the Swift compiler itself to crash. I plan to file this on bugs.swift.org.
