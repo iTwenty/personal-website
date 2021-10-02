@@ -1,14 +1,14 @@
 ---
 title: "Understanding Swift's Collection protocols"
-date: 2021-09-19T14:10:04+05:30
-draft: true
+date: 2021-10-02T14:10:04+05:30
+draft: false
 tags: [ios, swift]
 GHIssueID:
 ---
 
-If there's one aspect of Swift I avoided learning for the longest time, it would be the whole family of Collection types. The main reason is that the concrete implementations provided in the [standard library](https://developer.apple.com/documentation/swift/swift_standard_library/collections) - Arrays, Sets and Dictionaries - work fine for 99% of use cases. The other, more important reason is - there's just too many damn protocols!
+If there's one aspect of Swift I avoided learning for the longest time, it would be the whole family of Collection types. The main reason is that the concrete implementations provided in the [standard library](https://developer.apple.com/documentation/swift/swift_standard_library/collections) - Arrays, Sets and Dictionaries - work fine for 99% of use cases. The other, more important reason - there's just too many damn protocols!
 
-// TODO - INSERT DIAGRAM HERE
+{{<figure src="collection_hierarchy.png" alt="Swift Collections Hierarchy" caption="Too many damn protocols!" position="center" style="border-radius: 8px;">}}
 
 Not to mention that Swift 5.5. introduced a whole new family of `AsyncSequence` based protocols, which we will not be touching in this post. Let's try to figure what each of these protocols do, and why we need so many of them in the first place. We will do so by looking at each protocol starting from Sequence and moving down the tree.
 
@@ -22,7 +22,7 @@ public protocol IteratorProtocol {
 }
 ```
 
-A single method called `next()` that returns either next element or nil. Note that implementations are not required to return nil, meaning iterators can keep producing values infinitely. One rarely needs to create iterators directly, since sequences provide a more idiomatic approach for traversing sequences in Swift. Still, let's create a concrete iterator just to see how it works.
+A single method called `next()` that returns either next element or nil. It is marked mutating to give implementers a chance to update their internal state in preparation of next call to `next()`. If implementation does not return nil, iterators can keep producing values infinitely. We rarely need to create iterators directly, since sequences provide a more idiomatic approach for traversing sequences in Swift. Still, let's create a concrete iterator to see how it works.
 
 ```swift
 struct DoublingIterator: IteratorProtocol {
@@ -46,10 +46,10 @@ while let value = doublingIterator.next() {
 }
 ```
 
-A simple iterator that doubles it's value each time `next()` is called. You can omit the `limit` parameter in constructor and the iterator will keep doubling values forever.
+A simple iterator that doubles it's value each time `next()` is called. If we omit the `limit` parameter in constructor, the iterator will keep doubling values forever.
 
 ### Sequence
-A type that provides sequential, iterated access to its elements. A sequence is a list of values that you can step through one at a time. While seemingly simple, this capability gives you access to a large number of operations that you can perform on any sequence. The Sequence protocol provides default implementations for many common operations that depend on sequential access to a sequence's values. Before looking at these operations, let's look at the protocol definition first -
+A type that provides sequential, iterated access to its elements. A sequence is a list of values that we can step through one at a time. While seemingly simple, this capability gives us access to a large number of operations that we can perform on any sequence. The Sequence protocol provides default implementations for many common operations that depend on sequential access to a sequence's values. Before looking at these operations, let's look at the protocol definition -
 
 ```swift
 public protocol Sequence {
@@ -81,14 +81,14 @@ print(doubler.contains { $0 == 512 }) // true
 print(doubler.reduce(0, +)) // 2047
 ```
 
-Just by conforming to Sequence our Doubler type has gained the ability to be used in `for`-`in` loops and useful operations like `map`, `filter`, `reduce` etc. Sequence also gives us methods like `dropFirst(_:)`, `dropLast(_:)` etc. However, at Sequence level, the implementations of these methods are bound by the constraint of iterating over elements one at a time. This reflects in their time complexities - with `dropFirst(_:)` being O(k) where `k` is number of elements to drop, and `dropLast(_:)` being O(n) where `n` is total number of elements in sequence. `dropLast(_:)`, unlike `dropFirst(_:)`, requires the sequence to be finite.
+Just by conforming to Sequence, our concrete type has gained the ability to be used in `for`-`in` loops and useful operations like `map`, `filter`, `reduce` etc. Sequence also gives us methods like `dropFirst(_:)`, `dropLast(_:)` etc. However, at Sequence level, the implementations of these methods are bound by the constraint of iterating over elements one at a time. This reflects in their time complexities - with `dropFirst(_:)` being O(k) where `k` is number of elements to drop, and `dropLast(_:)` being O(n) where `n` is total number of elements in sequence. `dropLast(_:)`, unlike `dropFirst(_:)`, requires the sequence to be finite.
 
 There are a couple of things to be aware of while using Sequences -
 1. Sequence makes no guarantees about multiple iterations producing desired results. It is up to the implementing type to decide how to handle iterating over an sequence that has already been iterated over once.
-2. Sequence should provide its iterator in O(1). The Sequence protocol makes no other requirements about element access, so methods that traverse a sequence should be considered O(n) unless documented otherwise.
+2. Sequence should provide it's iterator in O(1). It makes no other requirements about element access. So methods that traverse a sequence should be considered O(n) unless documented otherwise.
 
 ### Collection
-A sequence whose elements can be traversed multiple times, nondestructively, and accessed by an indexed subscript. When you use arrays, dictionaries or sets, you benefit from the operations that the Collection protocol declares and implements. In addition to the operations that collections inherit from the Sequence protocol, you gain access to methods that depend on accessing an element at a specific position in a collection. The minimum protocol definition for Collection looks like this - 
+A sequence whose elements can be traversed multiple times, nondestructively, and accessed by an indexed subscript. When we use arrays, dictionaries or sets, we benefit from the operations that the Collection protocol declares and implements. In addition to the operations that collections inherit from the Sequence protocol, we gain access to methods that depend on accessing an element at a specific position in a collection. The minimum protocol definition for Collection looks like this - 
 
 ```swift
 protocol Collection: Sequence {
@@ -108,19 +108,23 @@ To better understand Collection (and types that will follow later) let's create 
 ```swift
 struct FunkyArray<Element> {
     private let start: Character = "A" // Start Index
-    private let end: Character = "Z" // End Index
+    private let end: Character = "[" // End Index. ASCII char after Z
     private var internalArray = [Element]()
 
-    init<S: Sequence>(_ elements: S) where S.Element == Element {
+    init<S: Collection>(_ elements: S) where S.Element == Element {
+        let maxElements = charToInt(end) - charToInt(start)
+        precondition(elements.count <= maxElements, "FunkyArray can have max of \(maxElements) elements.")
         elements.forEach { internalArray.append($0) }
     }
 
-    /// Converts character index to int index. A becomes 0, J becomes 10, Z becomes 25
+    /// Converts character index to int index. 
+    /// A becomes 0, J becomes 10, Z becomes 25
     private func charToInt(_ char: Character) -> Int {
         Int(char.asciiValue! - start.asciiValue!)
     }
 
-    /// Converts int index to character index. 0 becomes A, 10 becomes J, 25 becomes Z
+    /// Converts int index to character index. 
+    /// 0 becomes A, 10 becomes J, 25 becomes Z
     private func intToChar(_ int: Int) -> Character {
         Character(UnicodeScalar(start.asciiValue! + UInt8(int)))
     }
@@ -142,6 +146,7 @@ extension FunkyArray: Collection {
     }
 
     func index(after i: Character) -> Character {
+        // precondition ensures index nevers goes past Z
         precondition(i < end, "Index out of bounds")
         return intToChar(charToInt(i) + 1)
     }
@@ -161,7 +166,7 @@ let sub = funkyArray["B"..<"D"]
 sub.forEach { print($0) } // 2 4
 ```
 
-If we inspect the type of `sub`, it will be `Slice<FunkyArray<Int>>`. Accessing a subrange of Collection, does not return a new Collection, but rather a [SubSequence](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/Collection.swift#L395). Slice is a default implementation of SubSequence if the Collection does not provide it's own implementation. The SubSequence is backed by the original Collection. This makes subsequencing a extremely fast operation, but there are some gotchas to be aware of :
+If we inspect the type of `sub`, it will be `Slice<FunkyArray<Int>>`. Accessing a subrange of Collection, does not return a new Collection, but rather a [SubSequence](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/Collection.swift#L395). Slice is a default implementation of SubSequence if the Collection does not provide it's own implementation. SubSequence is a thin wrapper referencing the original collection, but with different start and end indices. This makes subsequencing extremely fast, but there are some gotchas to be aware of -
 
 ```swift
 var funkyArray = FunkyArray([1, 2, 4, 8, 16, 32])
@@ -177,7 +182,7 @@ print(sub2["A"]) // 2
 
 SubSequences share the indices of the backing Collection, and only update their own start and end indices. This means trying to access them using indices of original Collection can result in out of bounds error. As a general rule of thumb, even if the index types match, it is not a good idea to use indices from one Collection to access elements from another. The Swift compiler transparently creates a new copy of SubSequence whenever there's a modification. This behaviour is known as Copy-on-Write and preserves the value semantics of Collections while also enabling fast subsequencing.
 
-Conforming to Collection gives us access to `firstIndex(where:)`, since this method internally uses our implementation of `index(after:)`. However we don't have the ability to find the last index satisfying given predicate. For that, we need to look at BidirectionalCollection.
+Conforming to Collection gives us access to `firstIndex(where:)`, since this method internally uses our implementation of `index(after:)`. However we don't have the ability to find the last index satisfying given predicate. For that, we need to conform to BidirectionalCollection.
 
 ### BidirectionalCollection
 BidirectionalCollection supports backward as well as forward traversal. Bidirectional collections offer traversal backward from any valid index, not including a collection's `startIndex`. Bidirectional collections can therefore offer additional operations, such as a `last` property that provides efficient access to the last element. In addition, bidirectional collections have more efficient implementations of some sequence and collection methods, such as `reversed()`. The protocol definition is simple -
@@ -193,6 +198,7 @@ We just need to implement a method that gives an index immediately before passed
 ```swift
 extension FunkyArray: BidirectionalCollection {
     func index(before i: Character) -> Character {
+        // precondition ensures index nevers goes past A
         precondition(i > start, "Index out of bounds")
         return intToChar(charToInt(i) - 1)
     }
@@ -202,14 +208,14 @@ print(funkyArray.last!) // 32
 print(funkyArray.lastIndex { $0 < 5 } ?? "-") // C
 ```
 
-The ability to traverse backwards enables BidirectionalCollection to refine the implementation of `reversed()` method. `reversed()` method is originally [implemented](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/SequenceAlgorithms.swift#L698) at Sequence level with return type as `Array<Element>`. At Sequence level, it has O(N) runtime as the algorithm has to eagerly read elements from the start to end, much like you or me would do it when asked to implement `reversed()` in an interview. BidirectionalCollection [implements](https://github.com/apple/swift/blob/7123d2614b5f222d03b3762cb110d27a9dd98e24/stdlib/public/core/Reverse.swift#L265) `reversed()` in a way that does not read Sequence elements at all, but returns a type called ReversedCollection that wraps the original Collection. ReversedCollection transparently converts it's own indices into indices for base collection, and simply accesses elements from base collection as needed.
+The ability to traverse backwards enables BidirectionalCollection to refine the implementation of `reversed()` method. `reversed()` is originally [implemented](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/SequenceAlgorithms.swift#L698) at Sequence level with return type as `Array<Element>`. At Sequence level, it has O(N) runtime as the algorithm has to eagerly read elements from start to end, much like you or I would do it if asked to implement `reversed()` in an interview. BidirectionalCollection [implements](https://github.com/apple/swift/blob/7123d2614b5f222d03b3762cb110d27a9dd98e24/stdlib/public/core/Reverse.swift#L265) `reversed()` in a way that does not read Sequence elements at all, but returns a new type called ReversedCollection that wraps the original Collection. ReversedCollection transparently converts it's own indices into indices for base collection, and simply accesses elements from base collection as needed. Creating ReversedCollection has O(1) complexity.
 
 Since the return type for Sequence implementation differs from the BidirectionalCollection's return type, we can see two autocomplete prompts for `reversed()` in Xcode. We can select the one we want by explicitly declaring the type of variable supposed to hold the value of `reversed()`.
 
-// TODO - Reversed image
+{{<figure src="reversed_autocomplete.png" alt="Reversed autocomplete" caption="Two implementations of reversed()" position="center" style="border-radius: 8px;">}}
 
 ### MutableCollection
-If you try to modify any value in FunkyArray using subscript, things will crash and burn[^compiler_crash]. Collection only gives you subscript read access to it's elements. To unlock write access, you need to conform to MutableCollection. Protocol definition is simple -
+If we try to modify any value in FunkyArray using subscript, things will crash and burn[^compiler_crash]. Collection only gives us subscript read access to it's elements. To unlock write access, we need to conform to MutableCollection. Protocol definition is simple -
 
 ```swift
 protocol MutableCollection: Collection {
@@ -236,16 +242,18 @@ extension FunkyArray: MutableCollection {
     }
 
     func index(after i: Character) -> Character {
+        // precondition ensures index nevers goes past Z
         precondition(i < end, "Index out of bounds")
         return intToChar(charToInt(i) + 1)
     }
 }
 
+var funkyArray = FunkyArray([1, 2, 4, 8, 16, 32])
 funkyArray["F"] = 64
 print(funkyArray) // 1, 2, 4, 8, 16, 64
 ```
 
-MutableCollection seems like a simple addition, but it does give us access to useful methods like `swapAt(_:_:)` for swapping elements at two indices and `reverse()` for in-place reversal. One thing to be aware of while implementing MutableCollection is that subscript assignment should not change the length of the Collection itself. This is the reason why Strings don't conform to MutableCollection. Replacing a Character with another using subscript can change the length of String as Character itself doesn't have a fixed length.
+MutableCollection seems like a simple addition, but it gives us access to useful methods like `swapAt(_:_:)` for swapping elements at two indices and `reverse()` for in-place reversal. One thing to be aware of while implementing MutableCollection is that subscript assignment should not change the length of the Collection itself. This is the reason why Strings don't conform to MutableCollection. Replacing a Character with another using subscript can change the length of String as Character itself doesn't have a fixed length. The length constraint is also the reason why MutableCollection doesn't provide methods like `remove(_:)`, `append(_:)`, `insert(_:at:)` etc which we typically associate with the word "mutable".
 
 ### RandomAccessCollection
 A collection that supports efficient random access index traversal. RandomAccessCollections can move indices any distance and measure the distance between indices in O(1) time. Therefore, the fundamental difference between random access and bidirectional collections is that operations that depend on index movement or distance measurement offer significantly improved efficiency. The protocol definition is as simple as it gets -
@@ -255,13 +263,13 @@ public protocol RandomAccessCollection: BidirectionalCollection
 where SubSequence: RandomAccessCollection, Indices: RandomAccessCollection { }
 ```
 
-Besides requiring SubSequence and Indices types of BidirectionalCollection to themselves be RandomAccessCollections, it adds no requirements of it's own. What good is a protocol that has no requirements, you ask? Well, the actual requirements of RandomAccessCollection - implementing the `index(_:offsetBy:)` and `distance(from:to:)` methods with O(1) efficiency - can't be expressed in Swift's type system. [^time_complexity_requirements]. Conformance to this protocol is based on trust - the compiler trusts that your implementations meet the time complexity requirements since it can't verify them. Since our FunkyArray internally uses array, which already conforms to RandomAccessCollection, we don't need to provide refined implementations for any of the two methods.
+Besides requiring SubSequence and Indices types of BidirectionalCollection to themselves be RandomAccessCollections, it adds no requirements of it's own. What good is a protocol that has no requirements, you ask? Well, the actual requirements of RandomAccessCollection - implementing the `index(_:offsetBy:)` and `distance(from:to:)` methods with O(1) efficiency - can't be enforced at compile time. [^time_complexity_constraints]. Conformance to this protocol is based on trust - the compiler trusts that our implementations meet the time complexity requirements since it can't verify them. Since our FunkyArray internally uses array which already conforms to RandomAccessCollection, we don't need to provide refined implementations for any of the two methods.
 
 ```swift
 extension FunkyArray: RandomAccessCollection { }
 ```
 
-Conforming to RandomAccessCollection doesn't unlock a lot in terms of functionality, but it does improve performance of certain existing algorithms like `dropFirst(_:)`, `dropLast(_:)`, `prefix(_:)`, `suffix(_:)` which become O(1) operations now. Most importantly, `count` property is calculated in O(1) instead of requiring iteration of an entire collection. If our RandomAccessCollection also conforms to MutableCollection, we gain access to in-place `sort()` and `shuffle()` methods as well.
+Conforming to RandomAccessCollection doesn't unlock a lot in terms of functionality, but it does improve performance of certain existing algorithms like `dropFirst(_:)`, `dropLast(_:)`, `prefix(_:)`, `suffix(_:)` which become O(1) operations now. Most importantly, `count` property is guaranteed to be O(1) instead of (possibly) requiring iteration of an entire collection. If our RandomAccessCollection also conforms to MutableCollection, we gain access to in-place `sort()` and `shuffle()` methods as well.
 
 ### RangeReplaceableCollection
 A collection that does what it says. RangeReplaceableCollection supports replacement of an arbitrary subrange of elements with elements of another collection. This sounds a bit like MutableCollection, but the key difference here is that the new collection need not have same length as the one being replaced. Protocol definition is simple -
@@ -281,15 +289,17 @@ Conforming to the protocol is also simple[^replaceSubrange_bug] -
 extension FunkyArray: RangeReplaceableCollection {
     init() {}
 
-    mutating func replaceSubrange<C>(_ subrange: Range<Character>, with newElements: C) 
+    mutating func replaceSubrange<C>(_ subrange: Range<Character>, with newElements: C)
     where C : Collection, Element == C.Element {
-        let firstIndex = Int(subrange.lowerBound.asciiValue! - startIndex.asciiValue!)
-        let lastIndex = Int(subrange.upperBound.asciiValue! - startIndex.asciiValue!)
+        let firstIndex = charToInt(subrange.lowerBound) - charToInt(startIndex)
+        let lastIndex = charToInt(subrange.upperBound) - charToInt(startIndex)
         internalArray.replaceSubrange(firstIndex..<lastIndex, with: newElements)
     }
 }
 
+var funkyArray = FunkyArray([1, 2, 4, 8, 16, 32])
 funkyArray.append(contentsOf: [10, 20 ,30])
+print(funkyArray) // 1, 2, 4, 8, 16, 64, 10, 20, 30
 ```
 
 This single method unlocks a host of new functionality. We can insert a new collection at any index, accomplished by making `index`..<`index` as subrange. We can append a collection at the end, accomplished be inserting the collection at `endIndex` and remove all elements from collections, accomplished by simply calling the [empty init](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/RangeReplaceableCollection.swift#L643).
@@ -297,3 +307,13 @@ This single method unlocks a host of new functionality. We can insert a new coll
 Since RangeReplaceableCollections can modify the length of Collection, Strings can safely conform to it, unlike MutableCollection.
 
 ### Dictionaries and Sets
+Despite having a number of Collection protocols fine tuned for very specific constraints, things are far from perfect. Case in point being unordered collections like Sets and Dictionaries. Sets conform to Collection, which gives them access to methods like `firstIndex(of:)`, `subscript { get }` etc. This method makes no sense for an unordered Collection like Set. But I guess the benefits of conforming to Collection outweighed having a few API inconsistencies. Majority of set operations are implemented in Set type directly, or in SetAlgebra type which sits outside the Collection protocols we discussed in this post.
+
+Dictionaries conform to Collection as well. Based on the way you access a value using key as subscript, you would expect the Index to be of key's type and Element to be of value's type. However, dictionaries actually use an internal type for their Index and their Element type is a tuple (Key, Value). A look a Dictionary's code shows that there are actually two subscripts, [one](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/Dictionary.swift#L708) based on the internal Index to satisfy Collection protocol requirements and [another](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core/Dictionary.swift#L784) using Key which we are familiar with.
+
+---
+[^compiler_crash]: In my testing, I found that conforming to MutableCollection without making subscript settable did not throw any compile time errors, but caused the Swift compiler itself to crash. I plan to file this on bugs.swift.org.
+
+[^time_complexity_constraints]: I wonder if there's any compiler that can enforce runtime complexity at compile time... 🤔
+
+[^replaceSubrange_bug]: A [bug](https://bugs.swift.org/browse/SR-6501) in Swift compiler enables us to conform to RangeReplaceableCollection without implementing any methods. This causes no compile time errors, but causes an infinite recursion loop at runtime. This issue has been [fixed and merged](https://github.com/apple/swift/pull/38950). Next public release of Swift should fix this bug.

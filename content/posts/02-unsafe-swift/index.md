@@ -3,7 +3,7 @@ title: "Exploring Memory layout and Pointers in Swift"
 date: 2020-08-16T19:46:16+05:30
 draft: false
 tags: [ios, swift]
-GHIssueID: 4
+GHIssueID: 6
 ---
 
 ### What is Memory?
