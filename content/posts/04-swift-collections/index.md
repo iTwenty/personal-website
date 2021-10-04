@@ -219,7 +219,7 @@ Since the return type for Sequence implementation differs from the Bidirectional
 We can now move through our FunkyArray from both ends. But we can't yet change the value at any given Index. That functionality is provided by MutableCollection.
 
 ### MutableCollection
-If we try to modify any value in FunkyArray using subscript, things will crash and burn[^compiler_crash]. Collection only gives us subscript read access to it's elements. To unlock write access, we need to conform to MutableCollection. Protocol definition is simple -
+If we try to modify any value in FunkyArray using subscript, we will be greeted with a compile error. Collection only gives us subscript read access to it's elements. To unlock write access, we need to conform to MutableCollection. Protocol definition is simple -
 
 ```swift
 protocol MutableCollection: Collection {
@@ -324,8 +324,6 @@ Dictionaries conform to Collection as well. Based on the way you access a value 
 - [Swift source code](https://github.com/apple/swift/blob/92335b115a432e2ab0f50055584a2a5ce7f2808f/stdlib/public/core) - Swift stdlib is surprisingly well commented and readable.
 
 ---
-[^compiler_crash]: In my testing, I found that conforming to MutableCollection without making subscript settable did not throw any compile time errors, but caused the Swift compiler itself to crash. I plan to file this on bugs.swift.org.
-
 [^time_complexity_constraints]: I wonder if there's any compiler that can enforce runtime complexity at compile time... 🤔
 
-[^replaceSubrange_bug]: A [bug](https://bugs.swift.org/browse/SR-6501) in Swift compiler enables us to conform to RangeReplaceableCollection without implementing any methods. This causes no compile time errors, but causes an infinite recursion loop at runtime. This issue has been [fixed and merged](https://github.com/apple/swift/pull/38950). Next public release of Swift should fix this bug.
+[^replaceSubrange_bug]: A [bug](https://bugs.swift.org/browse/SR-6501) in Swift compiler enables us to conform to RangeReplaceableCollection without implementing any methods. This causes no compile time errors, but an infinite loop at runtime. This issue has been [fixed and merged](https://github.com/apple/swift/pull/38950). Next public release of Swift will likely include this fix.
