@@ -101,10 +101,10 @@ To understand `@loader_path`, we need to add some complexity to our test case. L
 
 Animal/Animal.c
 ```c
-void makeCatSound();
+void catSound();
 
-void makeAnimalSound() {
-  makeCatSound();
+void animalSound() {
+  catSound();
 }
 ```
 
