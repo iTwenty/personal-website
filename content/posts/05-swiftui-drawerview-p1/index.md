@@ -19,7 +19,7 @@ A breakdown of the features our DrawerView will support -
 
 We will discuss more on the last point when we get to it's implementation.
 
-The public API of our DrawerView looks like this -
+The public API of DrawerView looks like this -
 
 ```swift
 @State var isOpen = false
@@ -52,17 +52,50 @@ struct DrawerView<MainContent: View, DrawerContent: View>: View {
     }
 
     var body: some View {
-        Text("Hello world")
+        main()
     }
 }
+```
 
-struct DrawerView_Previews: PreviewProvider {
-    static var previews: some View {
-        DrawerView(isOpen: .constant(false)) {
-            Text("Main content")
-        } drawer: {
-            Text("Drawer Content")
+Main content and drawer content can be different types of views. So DrawerView needs two different generic types to represent them.
+ 
+We need to make sure that main view occupies the full size of the screen and drawer view occupies full height and some fraction of main view's width. We want this fraction to be easily configurable. In SwiftUI, the way to read the size of any view is by using [`GeometryReader`](https://developer.apple.com/documentation/swiftui/geometryreader). GeometryReader constructor takes a single closure and passes an instance of `GeometryProxy` to this closure. Using this proxy, we can get (among other things) the size of the view containing the GeometryReader[^geometryreader_swiftui_lab].
+
+```swift
+struct DrawerView<MainContent: View, DrawerContent: View>: View {
+
+    // 1
+    private let overlap: CGFloat = 0.7
+    ....
+    ....
+
+    var body: some View {
+        GeometryReader { proxy in
+            // 2
+            let drawerWidth = proxy.size.width * overlap
+            // 3
+            main().frame(width: proxy.size.width, height: proxy.size.height)
+            // 4
+            drawer().frame(width: drawerWidth, height: proxy.size.height)
         }
     }
 }
 ```
+
+{{< preview src="drawer_preview_1.png" >}}
+struct DrawerView_Previews: PreviewProvider {
+    static var previews: some View {
+        DrawerView(isOpen: .constant(false)) {
+            Color.red
+            Text("Main content")
+        } drawer: {
+            Color.green
+            Text("Drawer Content")
+        }
+    }
+}
+{{< /preview >}}
+
+
+---
+[^geometryreader_swiftui_lab]: To know more about GeometryReader, I highly recommend checking this article - https://swiftui-lab.com/geometryreader-to-the-rescue/

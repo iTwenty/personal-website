@@ -1,0 +1,7 @@
+<details>
+    <summary style="font-size: larger; font-weight: bold;">{{ .Get "title" | default "Preview" }}</summary>
+    <div class="grid-container" style="display: grid; grid-template-columns: 3fr 1fr;grid-auto-rows: 1fr;grid-column-gap: 12px;">
+        <pre class="language-swift" style="height: 100%;"><code class="language-swift" data-lang="swift">{{ .Inner | string }}</code></pre>
+        <img src="{{ .Get "src" | safeURL }}" alt="Preview Image">
+    </div>
+</details>
