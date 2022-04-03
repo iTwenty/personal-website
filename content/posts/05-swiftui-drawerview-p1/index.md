@@ -38,7 +38,9 @@ Let's go ahead and create the `DrawerView.swift` file which satisfies this API -
 ```swift
 import SwiftUI
 
+// 1
 struct DrawerView<MainContent: View, DrawerContent: View>: View {
+    // 2
     @Binding var isOpen: Bool
     private let main: () -> MainContent
     private let drawer: () -> DrawerContent
@@ -57,8 +59,10 @@ struct DrawerView<MainContent: View, DrawerContent: View>: View {
 }
 ```
 
-Main content and drawer content can be different types of views. So DrawerView needs two different generic types to represent them.
- 
+1. Main content and drawer content can be different types of views. So DrawerView needs two different generic types to represent them. 
+2. The boolean binding is not used for now, but we will use it later to close the drawer when any part of main content is tapped.
+
+### Lay things out
 We need to make sure that main view occupies the full size of the screen and drawer view occupies full height and some fraction of main view's width. We want this fraction to be easily configurable. In SwiftUI, the way to read the size of any view is by using [`GeometryReader`](https://developer.apple.com/documentation/swiftui/geometryreader). GeometryReader constructor takes a single closure and passes an instance of `GeometryProxy` to this closure. Using this proxy, we can get (among other things) the size of the view containing the GeometryReader[^geometryreader_swiftui_lab].
 
 ```swift
@@ -71,31 +75,87 @@ struct DrawerView<MainContent: View, DrawerContent: View>: View {
 
     var body: some View {
         GeometryReader { proxy in
-            // 2
+        // 2
             let drawerWidth = proxy.size.width * overlap
-            // 3
-            main().frame(width: proxy.size.width, height: proxy.size.height)
-            // 4
-            drawer().frame(width: drawerWidth, height: proxy.size.height)
+            ZStack(alignment: .topLeading) {
+                // 3
+                main().frame(width: proxy.size.width, height: proxy.size.height)
+                drawer().frame(width: drawerWidth, height: proxy.size.height)
+            }
         }
     }
 }
 ```
 
 {{< preview src="drawer_preview_1.png" >}}
-struct DrawerView_Previews: PreviewProvider {
-    static var previews: some View {
-        DrawerView(isOpen: .constant(false)) {
+struct ContentView: View {
+    @State var isOpen = false
+
+    var body: some View {
+        DrawerView(isOpen: $isOpen) {
             Color.red
-            Text("Main content")
+            Button("Show drawer") {
+                withAnimation {
+                    isOpen.toggle()
+                }
+            }
         } drawer: {
             Color.green
-            Text("Drawer Content")
+            Button("Hide drawer") {
+                withAnimation {
+                    isOpen.toggle()
+                }
+            }
         }
     }
 }
 {{< /preview >}}
 
+1. The `overlap` CGFloat property is a fraction between between 0 to 1. It governs how wide the drawer should be compared to the main content.
+2. Within our GeometryReader closure, we calculate the width of drawer using the width of the proxy and overlap fraction.
+3. We embed both main and drawer views inside a ZStack, giving them appropriate frame values.
+
+### Show/hide drawer programtically
+
+Note that in ContentView, we are toggling the isOpen boolean on button taps. Tapping the buttons won't do anything yet. To fix this, we need to modify the position of drawer along X axis in response to the boolean value. This can be accomplished by adding an `offset` modifier to drawer view.
+
+
+```swift
+    var body: some View {
+        GeometryReader { proxy in
+            let drawerWidth = proxy.size.width * overlap
+            ZStack(alignment: .topLeading) {
+                main().frame(width: proxy.size.width, height: proxy.size.height)
+                drawer()
+                    .frame(width: drawerWidth, height: proxy.size.height)
+                    // 1
+                    .offset(x: isOpen ? 0 : -drawerWidth, y: 0)
+            }
+        }
+    }
+```
+
+1. When isOpen is true, we set drawer X-axis offset to 0. This will show the drawer in it's original position i.e overlapping the main view. When isOpen is false, we set the offset equal to negative of drawer width. This will effectively "hide" the drawer by moving it off screen. We don't need to change Y-axis offset.
+
+Tapping the buttons in ContentView should now toggle the drawer visibility with a nice animation. We don't need to write any animation code besides wrapping the changes to isOpen in a `withAnimation` block. SwiftUI is smart enough to figure out what properties need to change based on this boolean and smoothly animate between their start and end values (in this case - the X-axis offsets). Pretty cool, huh?
+
+### Fade main view gradually
+
+For putting more focus on the drawer when it is open, we can fade the main view progressively as drawer opens. We also need to make sure that -
+- Main view's content is disabled from user interaction while drawer is open
+- Tapping the main view content anywhere closes the drawer
+
+This might sound like a lot of work, but it's actually very trivial to achieve thanks to the power of modifiers. SwiftUI is smart enough to infer that if a modifier is not going to affect the view tree, it can effectively be "removed" from the view. To understand what this means, try running this piece of code on a simulator -
+
+
+```swift
+Color.red.opacity(1)
+    .onTapGesture {
+        print("Tapped")
+    }
+```
+
+Whole screen will be red and tapping anywhere will print the message in console. Now change opacity to 0. This time, no message will be printed since setting opacity to 0 effectively hides the view and so SwiftUI also removes the tap gesture associated with it.
 
 ---
 [^geometryreader_swiftui_lab]: To know more about GeometryReader, I highly recommend checking this article - https://swiftui-lab.com/geometryreader-to-the-rescue/
