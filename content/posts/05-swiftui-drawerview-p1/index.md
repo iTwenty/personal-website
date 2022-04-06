@@ -135,6 +135,30 @@ Note that in ContentView, we are toggling the isOpen boolean on button taps. Tap
     }
 ```
 
+{{< preview src="drawer_preview_2.gif" >}}
+struct ContentView: View {
+    @State var isOpen = false
+
+    var body: some View {
+        DrawerView(isOpen: $isOpen) {
+            Color.red
+            Button("Show drawer") {
+                withAnimation {
+                    isOpen.toggle()
+                }
+            }
+        } drawer: {
+            Color.green
+            Button("Hide drawer") {
+                withAnimation {
+                    isOpen.toggle()
+                }
+            }
+        }
+    }
+}
+{{< /preview >}}
+
 1. When isOpen is true, we set drawer X-axis offset to 0. This will show the drawer in it's original position i.e overlapping the main view. When isOpen is false, we set the offset equal to negative of drawer width. This will effectively "hide" the drawer by moving it off screen. We don't need to change Y-axis offset.
 
 Tapping the buttons in ContentView should now toggle the drawer visibility with a nice animation. We don't need to write any animation code besides wrapping the changes to isOpen in a `withAnimation` block. SwiftUI is smart enough to figure out what properties need to change based on this boolean and smoothly animate between their start and end values (in this case - the X-axis offsets). Pretty cool, huh?
@@ -156,6 +180,74 @@ Color.red.opacity(1)
 ```
 
 Whole screen will be red and tapping anywhere will print the message in console. Now change opacity to 0. This time, no message will be printed since setting opacity to 0 effectively hides the view and so SwiftUI also removes the tap gesture associated with it.
+
+Using this technique, we can add an overlay for the main view -
+
+```swift
+struct DrawerView<MainContent: View, DrawerContent: View>: View {
+
+    ...
+    // 1
+    private let overlayColor = Color.gray
+    private let overlayOpacity = 0.7
+
+    ...
+    var body: some View {
+        GeometryReader { proxy in
+            let drawerWidth = proxy.size.width * overlap
+            ZStack(alignment: .topLeading) {
+                main()
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    // 3
+                    .overlay(mainOverlay)
+                drawer()
+                    .frame(width: drawerWidth, height: proxy.size.height)
+                    .offset(x: isOpen ? 0 : -drawerWidth, y: 0)
+            }
+        }
+    }
+
+    // 2
+    private var mainOverlay: some View {
+        overlayColor.opacity(isOpen ? overlayOpacity : 0.0)
+            .onTapGesture {
+                withAnimation {
+                    isOpen.toggle()
+                }
+            }
+    }
+}
+```
+
+{{< preview src="drawer_preview_3.gif" >}}
+struct ContentView: View {
+    @State var isOpen = false
+
+    var body: some View {
+        DrawerView(isOpen: $isOpen) {
+            Color.red
+            Button("Show drawer") {
+                withAnimation {
+                    isOpen.toggle()
+                }
+            }
+        } drawer: {
+            Color.green
+            Button("Hide drawer") {
+                withAnimation {
+                    isOpen.toggle()
+                }
+            }
+        }
+    }
+}
+{{< /preview >}}
+
+1. We define the color of the overlay and it's opacity when drawer is fully open. The opacity will be 0 when drawer is closed.
+2. We define a view for overlay whose opacity depends on `isOpen` boolean and add a tap gesture which toggles the boolean to this view.
+3. We add this view as an overlay to our main view.
+
+### Safe area considerations
 
 ---
 [^geometryreader_swiftui_lab]: To know more about GeometryReader, I highly recommend checking this article - https://swiftui-lab.com/geometryreader-to-the-rescue/
