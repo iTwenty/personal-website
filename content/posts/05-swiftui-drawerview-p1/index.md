@@ -15,9 +15,6 @@ A breakdown of the features our DrawerView will support -
 - We should be able to open/close the drawer programatically
 - Main view should gradually fade as drawer view slides in
 - We should be able to use drag gestures to open/close the drawer
-- Drawer should "interact" with the drag gesture.
-
-We will discuss more on the last point when we get to it's implementation.
 
 The public API of DrawerView looks like this -
 
@@ -255,7 +252,7 @@ Thanks to the overlay, the underlying main view content becomes non-interactive 
 
 ### Adding support for drag gestures
 
-Our DrawerView still lacks one critical functionality that Android's view has - Drag support. To avoid making this post too long, we will focus on adding this support in another post which can be found here.
+Our DrawerView still lacks one critical feature that Android has - Drag support. To avoid making this post too long, we will focus on adding this support in another post which can be found [here]({{< ref "/posts/06-swiftui-drawerview-p2/index.md" >}}).
 
 ---
 [^geometryreader_swiftui_lab]: To know more about GeometryReader, I highly recommend checking this article - https://swiftui-lab.com/geometryreader-to-the-rescue/
