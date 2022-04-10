@@ -144,15 +144,177 @@ struct DrawerView<MainContent: View, DrawerContent: View>: View {
 If we run the application now, nothing will have changed visually, but we have laid down all the groundwork needed for adding an interactive drag gesture. So let's go ahead and do that.
 
 ### Gestures in SwiftUI
+
 Gestures in SwiftUI are applied to specific views in the view hierarchy. To recognize a gesture event on a particular view, we first create and configure the gesture and then use the `gesture(_:including:)` view modifier.
 
-To receive updates from the gesture itself, we have to use gesture modifiers. There are three gesture modifiers -
+To receive updates from the gesture itself, we have to use gesture modifiers, of which there are three -
 
 1. `updating(_:body:)` 
 2. `onChanged(_:)`
 3. `onEnded(_:)`
 
 For our drag gesture, we are primarily interested in the last two. `onChanged` is called when the gesture begins and - for continuous gestures like drag gesture - each time the gesture's value changes.
-`onEnded` is invoked - unsurprisingly - when the gesture ends. Note that SwiftUI only invokes `onEnded` if the gesture succeeds. The definition of success depends on the gesture under consideration. For example, `DragGesture` takes in a `minimumDistance` parameter. If the user begins dragging, but lifts his finger before moving at least `minimumDistance` pixels from the gesture start point, the gesture won't be considered a success and `onEnded` won't be invoked.
+`onEnded` is invoked - unsurprisingly - when the gesture ends. Note that SwiftUI only invokes `onEnded` if the gesture succeeds. The definition of success depends on the gesture under consideration. For example, `DragGesture` takes in a `minimumDistance` parameter. If the user begins dragging, but lifts his finger before moving at least `minimumDistance` pixels, the gesture won't be considered a success and `onEnded` won't be invoked.
+
+Both these modifiers provide a parameter of type `DragGesture.Value` which we can use to read properties like gestures's start location, it's current translation etc. We are primarily interested in `translation` CGSize property. This property is updated everytime the finger moves and tells us the total translation from the start of the drag gesture to the current event of the drag gesture.
+
+Another helpful tip to remember is that in iOS, right/down means positive and left/up means negative. Origin is generally at top left corner.
+
+### Adding drag gesture to DrawerView
+
+At this point, it is helpful to understand how the drag values change in response to drag gesture. So let's go ahead and attach a DragGesture to our ZStack and log some interesting values as we drag across the view.
+
+```swift
+struct DrawerView<MainContent: View, DrawerContent: View>: View {
+    ...
+    var body: some View {
+        GeometryReader { proxy in
+            let drawerWidth = proxy.size.width * overlap
+            ZStack(alignment: .topLeading) {
+                ...
+            }
+            // 1
+            .gesture(dragGesture(proxy.size.width))
+            ...
+        }
+    }
+    ...
+    // 2
+    private func dragGesture(_ mainWidth: CGFloat) -> some Gesture {
+        return DragGesture().onChanged { value in
+            print("onChanged startX : \(value.startLocation.x), moveX : \(value.translation.width)")
+        }.onEnded { value in
+            print("onEnded startX : \(value.startLocation.x), moveX : \(value.translation.width)")
+        }
+    }
+}
+```
+
+{{< preview src="drawer_preview_4.gif" >}}
+CONSOLE OUTPUT :
+onChanged startX : 98.666656, moveX : 10.333344
+onChanged startX : 98.666656, moveX : 12.666672
+onChanged startX : 98.666656, moveX : 14.666672
+onChanged startX : 98.666656, moveX : 16.333344
+.....
+onChanged startX : 98.666656, moveX : 44.666672
+onChanged startX : 98.666656, moveX : 43.666672
+onChanged startX : 98.666656, moveX : 43
+.....
+onChanged startX : 98.666656, moveX : 2.666672
+onChanged startX : 98.666656, moveX : 1.333344
+onChanged startX : 98.666656, moveX : -0.333328
+onChanged startX : 98.666656, moveX : -1.666656
+onChanged startX : 98.666656, moveX : -3
+.....
+onChanged startX : 98.666656, moveX : -73
+onChanged startX : 98.666656, moveX : -73.333328
+onChanged startX : 98.666656, moveX : -73.666656
+onEnded startX : 98.666656, moveX : -73.666656
+{{< /preview >}}
+
+1. We attach a drag gesture to our ZStack using `gesture` modifier.
+2. To the drag gesture, we attach `onChanged` and `onEnded` modifiers using which we log the X values of drag start location and drag translation. We are not interested in Y values.
+
+As we can see in the logs, startX remains same across the whole gesture. moveX increases as we move our finger from left to right, starts decreasing as we move from right to left. As we keep moving past the drag start location, moveX becomes negative and keeps decreasing. The full range of values possible for moveX goes from 0 to `proxy.size.width` when we start dragging from extreme left edge and move all the way to right edge. When done the other way round i.e start drag from right edge all the way to left edge, moveX will have a value between 0 to `-proxy.size.width`.
+
+Next, let's focus on what we want our drag gesture to accomplish. I will call `proxy.size.width` as mainWidth from now on, since it denotes the width of our main view.
+
+1. When the gesture begins, if drawer is closed, ignore -ve moveX values. Convert the positive moveX values that will fall in range [0, mainWidth] to corresponding value in range [0, 1].
+2. When the gesture begins, if drawer is open, ignore +ve moveX values. Convert the negative moveX values that will fall in range [-mainWidth, 0] to corresponding value in range [0, 1].
+
+The value we get from either of these steps becomes the new value of `openFraction`. Let's write this down in code and see what it looks like -
+
+```swift
+// 2
+private func dragGesture(_ mainWidth: CGFloat) -> some Gesture {
+    return DragGesture().onChanged { value in
+        if isOpen, value.translation.width < 0 {
+            openFraction = openFraction(value.translation.width, from: -mainWidth...0)
+        } else if !isOpen, value.translation.width > 0 {
+            openFraction = openFraction(value.translation.width, from: 0...mainWidth)
+        }
+    }.onEnded { value in
+        print("onEnded startX : \(value.startLocation.x), moveX : \(value.translation.width)")
+    }
+}
+
+// 1
+private func openFraction(_ moveX: CGFloat, from: ClosedRange<CGFloat>) -> CGFloat {
+    remap(value: moveX, from: from, to: 0...1)
+}
+```
+
+1. We introduce a new helper function that maps `moveX` values in the passed `from` range to values in range of `0...1`. We call this function `openFraction` since it's return value is meant to assigned to `openFraction` property
+2. In the `onChanged` modifier of our Drag gesture, we code-ify the drag gesture conditions mentioned in previous paragraph.
+
+If we run the app at this point, we will notice that drag gestures work perfectly as long as our finger is pressed down and moved. Once we lift the finger though, the drawer state doesn't snap to either open or closed state. This is something we need to do in `onEnded` modifier.
+
+### Snapping to closest state on gesture end
+
+In the introduction of this post, we mentioned that the end state will depend variables like how far along the user dragged his finger, how fast the drag was just before user lifted his finger etc. This might sound like a lot of work involving some complex mathematics, but it's actually fairly trivial to achieve since SwiftUI already does the complex parts for you. The `value` parameter passed to `onEnded` modifier has property called `[predictedEndTranslation](https://developer.apple.com/documentation/swiftui/draggesture/value/predictedendtranslation)` whose documentation says "A prediction, based on the current drag velocity, of what the final translation will be if dragging stopped now."
+
+By passing the width of this predicted translation to the `openFraction` function we defined earlier, we can get `predictedOpenFraction`. If this prediction is less than 0.5, we set it to 0, else we set it to 1.
+
+```swift
+private func dragGesture(_ mainWidth: CGFloat) -> some Gesture {
+    return DragGesture().onChanged { value in
+    ...
+    }.onEnded { value in
+        // 1
+        let fromRange = isOpen ? -mainWidth...0 : 0...mainWidth
+        let predictedMoveX = value.predictedEndTranslation.width
+        let predictedOpenFraction = openFraction(predictedMoveX, from: fromRange)
+        if predictedOpenFraction > 0.5 {
+            withAnimation {
+                // 2
+                openFraction = 1
+                isOpen = true
+            }
+        } else {
+            withAnimation {
+                // 2
+                openFraction = 0
+                isOpen = false
+            }
+        }
+    }
+}
+```
+
+1. Just like we did in `onChanged` modifier, we need to ensure that we use the correct source range for our drag gesture.
+2. We need to ensure that we keep isOpen and openFraction in sync, or bad things will happen.
+
+### Opening drawer only if drag begins close to left edge
+
+Our DrawerView implementation is almost done. It responds beautifully to drag gestures. Try performing various types of drags like small slow flicks, small fast flicks, long slow drags etc and see how the view responds naturally to all these gestures. One thing you might notice if drawer is in closed state -  dragging right from anywhere triggers the opening animation. Ideally, we want to restrict it to only trigger when the drag originates near the left edge of the screen. This can be easily done by adding another property called `dragOpenThreshold` which is a fraction of main view's width. If the drag start location's X co-ordinate is less than this value, only then we start sliding the drawer in.
+
+```swift
+struct DrawerView<MainContent: View, DrawerContent: View>: View {
+    ...
+    // 1
+    private let dragOpenThreshold = 0.1
+
+    ...
+    private func dragGesture(_ mainWidth: CGFloat) -> some Gesture {
+        return DragGesture().onChanged { value in
+            if isOpen, value.translation.width < 0 {
+                openFraction = openFraction(value.translation.width, from: -mainWidth...0)
+            // 2
+            } else if !isOpen, value.startLocation.x < mainWidth * dragOpenThreshold, value.translation.width > 0 {
+                openFraction = openFraction(value.translation.width, from: 0...mainWidth)
+            }
+        }.onEnded { value in
+            // 3
+            if openFraction == 1 || openFraction == 0 {
+                return
+            }
+            ...
+    }
+```
+
+1. We introduce a new property `dragOpenThreshold`. This is a fractional value between 0 to 1, much like `openFraction`.
+2. While opening, we consider the drag gesture to be valid only if the X co-ordinate of gesture's start location is less than ` mainWidth * dragOpenThreshold`.
+3. We add a safety check in `onEnded` to not update the drawer state if `onChange` doesn't manage to change the value of `openFraction`.
 
 ---
