@@ -6,9 +6,9 @@ tags: [ios, android, swiftui]
 GHIssueID:
 ---
 
-Android's Jetpack Compose has a nifty navigation drawer that is useful for adding navigation to different sections of an app. iOS doesn't have any equivalent UI element, either in UIKit or in SwiftUI. However, the view is pretty easy to create in SwiftUI - and that is exactly what we will be doing over the course of this post. This is going to be our end goal:
+Android's Jetpack Compose has a nifty navigation drawer component that is useful for adding navigation to different sections of an app. iOS doesn't have any equivalent UI element, either in UIKit or in SwiftUI. However, the view is pretty easy to create in SwiftUI - and that is exactly what we will be doing over the course of two posts. This is going to be our end goal:
 
-{{< youtube idGlGvZMSKg >}}
+{{< video src="drawerview.webm" type="video/webm" preload="auto" >}}
 
 A breakdown of the features our DrawerView will support -
 
@@ -57,10 +57,11 @@ struct DrawerView<MainContent: View, DrawerContent: View>: View {
 ```
 
 1. Main content and drawer content can be different types of views. So DrawerView needs two different generic types to represent them. 
-2. The boolean binding is not used for now, but we will use it later to close the drawer when any part of main content is tapped.
+2. The boolean binding is not used for now, but we will use it later to close the drawer when the overlay we add to main view is tapped.
 
 ### Lay things out
-We need to make sure that main view occupies the full size of the screen and drawer view occupies full height and some fraction of main view's width. We want this fraction to be easily configurable. In SwiftUI, the way to read the size of any view is by using [`GeometryReader`](https://developer.apple.com/documentation/swiftui/geometryreader). GeometryReader constructor takes a single closure and passes an instance of `GeometryProxy` to this closure. Using this proxy, we can get (among other things) the size of the view containing the GeometryReader[^geometryreader_swiftui_lab].
+
+We need to make sure that main view occupies the full size of the screen while drawer view occupies full height and some fraction of main view's width. In SwiftUI, the way to read the size of any view is by using [`GeometryReader`](https://developer.apple.com/documentation/swiftui/geometryreader). GeometryReader constructor takes a single closure and passes an instance of `GeometryProxy` to this closure. Using this proxy, we can get (among other things) the size of the view containing the GeometryReader[^geometryreader_swiftui_lab].
 
 ```swift
 struct DrawerView<MainContent: View, DrawerContent: View>: View {
@@ -110,16 +111,15 @@ struct ContentView: View {
 }
 {{< /preview >}}
 
-1. The `overlap` CGFloat property is a fraction between between 0 to 1. It governs how wide the drawer should be compared to the main content.
+1. The `overlap` CGFloat property is a fraction between between 0 to 1. It governs how wide the drawer should be compared to the main content. As an example, overlap value of 0.7 means drawer view's width will be 70% of main view's width.
 2. Within our GeometryReader closure, we calculate the width of drawer using the width of the proxy and overlap fraction.
 3. We embed both main and drawer views inside a ZStack. Drawer comes after main since we want drawer to show on top of main view.
-4. We embed main view in an infinitely sized frame. Practically, this means the frame will extend to occupy same size as it's first *non layout neutral* parent. Since both ZStack and GeometryReader are layout neutral, the frame will end up occupying the size of the device screen.
+4. We embed main view in an infinitely sized frame. Practically, this means the frame will extend to occupy same size as it's first *non layout neutral*[^layout_neutral] parent. Since both ZStack and GeometryReader are layout neutral, the frame will end up occupying the size of the device screen.
 5. We embed drawer in a frame with infinite height, but width is constrained to what we calculated in step 2.
 
-### Show/hide drawer programtically
+### Show/hide drawer programatically
 
-Note that in ContentView, we are toggling the isOpen boolean on button taps. Tapping the buttons won't do anything yet. To fix this, we need to modify the position of drawer along X axis in response to the boolean value. This can be accomplished by adding an `offset` modifier to drawer view.
-
+Note that in ContentView, we are toggling the `isOpen` boolean on button taps. Tapping the buttons won't do anything yet. To fix this, we need to modify the position of drawer along X axis in response to the boolean value. This can be accomplished by adding an `offset` modifier to drawer view.
 
 ```swift
 var body: some View {
@@ -160,9 +160,9 @@ struct ContentView: View {
 }
 {{< /preview >}}
 
-When isOpen is true, we set drawer X-axis offset to 0. This will show the drawer in it's original position i.e overlapping the main view. When isOpen is false, we set the offset equal to negative of drawer width. This will effectively "hide" the drawer by moving it off screen. We don't need to change Y-axis offset.
+When `isOpen` is true, we set drawer X-axis offset to 0. This will show the drawer in it's original position i.e overlapping the main view. When `isOpen` is false, we set the offset equal to negative of drawer width. This will effectively "hide" the drawer by moving it off screen. We don't need to change Y-axis offset.
 
-Tapping the buttons in ContentView should now toggle the drawer visibility with a nice animation. We don't need to write any animation code besides wrapping the changes to isOpen in a `withAnimation` block. SwiftUI is smart enough to figure out what properties need to change based on this boolean and smoothly animate between their start and end values (in this case - the X-axis offsets). Pretty cool, huh?
+Tapping the buttons in `ContentView` should now toggle the drawer visibility with a nice animation. We don't need to write any animation code besides wrapping the changes to `isOpen` in a `withAnimation` block. SwiftUI is smart enough to figure out what properties need to change based on this boolean and smoothly animate between their start and end values (in this case - the X-axis offsets). Pretty cool, huh?
 
 ### Fade main view gradually
 
@@ -170,8 +170,7 @@ For putting more focus on the drawer when it is open, we can fade the main view 
 - Main view's content is disabled from user interaction while drawer is open
 - Tapping the main view content anywhere closes the drawer
 
-This might sound like a lot of work, but it's actually very trivial to achieve thanks to the power of modifiers. SwiftUI is smart enough to infer that if a modifier is not going to affect the view tree, it can effectively be "removed" from the view. To understand what this means, try running this piece of code on a simulator -
-
+Both of these features can be added easily thanks to the power of modifiers. SwiftUI is smart enough to infer that if a modifier is not going to affect the view tree, it can effectively be "removed" from the view. To understand what this means, try running this piece of code on a simulator -
 
 ```swift
 Color.red.opacity(1)
@@ -252,9 +251,11 @@ Thanks to the overlay, the underlying main view content becomes non-interactive 
 
 ### Adding support for drag gestures
 
-Our DrawerView still lacks one critical feature that Android has - Drag support. To avoid making this post too long, we will focus on adding this support in another post which can be found [here]({{< ref "/posts/06-swiftui-drawerview-p2/index.md" >}}).
+Our DrawerView still lacks one critical feature - drag support. To avoid making this post too long, we will focus on adding this support in another post which can be found [here]({{< ref "/posts/06-swiftui-drawerview-p2/index.md" >}}). Source code for this post can be found [here](https://github.com/iTwenty/DrawerView/tree/8895893e801a9e1262e875821f96663617e00e13)/
 
 ---
-[^geometryreader_swiftui_lab]: To know more about GeometryReader, I highly recommend checking this article - https://swiftui-lab.com/geometryreader-to-the-rescue/
+[^geometryreader_swiftui_lab]: To know more about GeometryReader, I recommend checking this article - https://swiftui-lab.com/geometryreader-to-the-rescue/
+
+[^layout_neutral]: To know more about layout neutrality in SwiftUI, I recommend checking this article - https://www.hackingwithswift.com/books/ios-swiftui/how-layout-works-in-swiftui
 
 [^inert_modifiers]: I couldn't find any official documentation for this behaviour. The closest thing is "Inert Modifiers" as talked about in WWDC21's "[Demystify SwiftUI](https://developer.apple.com/videos/play/wwdc2021/10022/)" talk (37:30 onwards).
