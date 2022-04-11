@@ -1,9 +1,9 @@
 ---
 title: "Drag Gestures in SwiftUI"
 date: 2022-04-09T15:11:44+05:30
-draft: true
+draft: false
 tags: [ios, android, swiftui]
-GHIssueID:
+GHIssueID: 8
 ---
 
 *NOTE : This post builds upon the DrawerView implementation from the [previous post]({{< ref "/posts/05-swiftui-drawerview-p1/index.md" >}}).*
