@@ -8,7 +8,7 @@ GHIssueID: 7
 
 Android's Jetpack Compose has a nifty navigation drawer component that is useful for adding navigation to different sections of an app. iOS doesn't have any equivalent UI element, either in UIKit or in SwiftUI. However, the view is pretty easy to create in SwiftUI - and that is exactly what we will be doing over the course of two posts. This is going to be our end goal:
 
-{{< video src="drawerview.webm" type="video/webm" preload="auto" >}}
+{{< video src="drawerview.mp4" type="video/mp4" preload="auto" >}}
 
 A breakdown of the features our DrawerView will support -
 
@@ -251,7 +251,7 @@ Thanks to the overlay, the underlying main view content becomes non-interactive 
 
 ### Adding support for drag gestures
 
-Our DrawerView still lacks one critical feature - drag support. To avoid making this post too long, we will focus on adding this support in another post which can be found [here]({{< ref "/posts/06-swiftui-drawerview-p2/index.md" >}}). Source code for this post can be found [here](https://github.com/iTwenty/DrawerView/tree/8895893e801a9e1262e875821f96663617e00e13)/
+Our DrawerView still lacks one critical feature - drag support. To avoid making this post too long, we will focus on adding this support in another post which can be found [here]({{< ref "/posts/06-swiftui-drawerview-p2/index.md" >}}). Source code for this post can be found [here](https://github.com/iTwenty/DrawerView/tree/8895893e801a9e1262e875821f96663617e00e13).
 
 ---
 [^geometryreader_swiftui_lab]: To know more about GeometryReader, I recommend checking this article - https://swiftui-lab.com/geometryreader-to-the-rescue/
