@@ -1,5 +1,6 @@
 ---
 title: "Understanding Swift's Collection protocols"
+description: "Get familiar intro to the intricate family of collection protocols in Swift."
 date: 2021-10-02T14:10:04+05:30
 draft: false
 tags: [ios, swift]

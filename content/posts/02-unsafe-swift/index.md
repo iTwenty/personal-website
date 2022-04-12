@@ -1,5 +1,6 @@
 ---
 title: "Exploring Memory layout and Pointers in Swift"
+description: "Learn how structs are laid out in memory, followed by a dive into the world of pointers in Swift."
 date: 2020-08-16T19:46:16+05:30
 draft: false
 tags: [ios, swift]

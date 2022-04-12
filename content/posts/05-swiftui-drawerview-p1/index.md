@@ -1,5 +1,6 @@
 ---
 title: "Create Android style navigation drawer in SwiftUI"
+description: "Learn how to leverage the power of SWiftUI to create Android's navigation drawer in SwiftUI."
 date: 2022-04-01T14:28:35+05:30
 draft: false
 tags: [ios, android, swiftui]
