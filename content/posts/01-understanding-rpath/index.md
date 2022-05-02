@@ -1,6 +1,7 @@
 ---
 title: "Understanding dyld @executable_path, @loader_path and @rpath"
-description: "Learn what these esoteric paths mean with practical examples."
+summary: "Learn what these esoteric paths mean with practical examples."
+hideReadMore: true
 date: 2020-07-10T10:39:18+05:30
 draft: false
 tags: [ios, compiler]

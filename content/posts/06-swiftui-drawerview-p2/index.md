@@ -1,6 +1,7 @@
 ---
 title: "Drag Gestures in SwiftUI"
-description: "Explore how to use drag gestures to recreate Android's navigation drawer in SwiftUI."
+summary: "Explore drag gestures in SwiftUI while building a navigation drawer."
+hideReadMore: true
 date: 2022-04-09T15:11:44+05:30
 draft: false
 tags: [ios, android, swiftui]

@@ -1,6 +1,7 @@
 ---
 title: "Visualizing CGAffineTransforms"
-description: "Understand what linear and affine transforms mean. Visually."
+summary: "Understand what linear and affine transforms mean. Visually."
+hideReadMore: true
 date: 2020-10-17T13:46:30+05:30
 draft: false
 tags: [ios, swift]

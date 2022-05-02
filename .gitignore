@@ -3,6 +3,7 @@
 
 # Hugo generated resources dir
 /resources
+.hugo_build_lock
 
 ## OS Files
 # Windows
