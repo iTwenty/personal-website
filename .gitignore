@@ -4,6 +4,7 @@
 # Hugo generated resources dir
 /resources
 .hugo_build_lock
+.hugo_build.lock
 
 ## OS Files
 # Windows
