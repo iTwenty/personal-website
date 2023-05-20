@@ -16,7 +16,7 @@ copyright = "All content licensed under Apache License 2.0"
   defaultTheme = "dark"
 
   # if you set this to 0, only submenu trigger will be visible
-  showMenuItems = 4
+  showMenuItems = 5
 
   # Show reading time in minutes for posts
   showReadingTime = false
@@ -58,18 +58,22 @@ copyright = "All content licensed under Apache License 2.0"
         identifier = "Posts"
         name = "/posts"
         url = "/posts"
-
-      [[languages.en.menu.main]]
-        identifier = "About"
-        name = "/about"
-        url = "/about"
-
-      [[languages.en.menu.main]]
-        identifier = "Projects"
-        name = "/projects"
-        url = "/projects"
+        weight = 1
 
       [[languages.en.menu.main]]
         identifier = "Blender"
         name = "/blender"
         url = "/blender"
+        weight = 3
+
+      [[languages.en.menu.main]]
+        identifier = "Projects"
+        name = "/projects"
+        url = "/projects"
+        weight = 4
+
+      [[languages.en.menu.main]]
+        identifier = "About"
+        name = "/about"
+        url = "/about"
+        weight = 5
