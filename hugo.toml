@@ -2,6 +2,7 @@ baseurl = "https://itwenty.me"
 languageCode = "en-us"
 theme = ["hello-friend", "hugo-shortcode-gallery"]
 paginate = 5
+copyright = "All content licensed under Apache License 2.0"
 
 [permalinks]
   posts = "/:year/:month/:title/"
@@ -32,7 +33,6 @@ paginate = 5
   [languages.en]
     title = "iTwenty's Space"
     keywords = ""
-    copyright = ""
     menuMore = "Show more"
     writtenBy = "Written by"
     readMore = "Read more"
