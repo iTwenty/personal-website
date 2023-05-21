@@ -1,0 +1,65 @@
+defaultTheme = "auto"
+dateFormat = "Jan 02, 2006"
+
+[header]
+  themeChangeMode = "switch"
+
+[footer]
+  copyright = false
+  hugo = false
+
+[section]
+  paginate = 20
+  dateFormat = "Jan 02"
+  rss = 10
+
+[home]
+  [home.posts]
+    enable = false
+
+[search]
+  enable = true
+  type = "fuse"
+  contentLength = 4000
+  placeholder = ""
+  maxResultLength = 10
+  snippetLength = 30
+  highlightTag = "em"
+  [search.fuse]
+    isCaseSensitive = false
+    minMatchCharLength = 2
+    findAllMatches = false
+    location = 0
+    threshold = 0.3
+    distance = 100
+    ignoreLocation = false
+    useExtendedSearch = false
+    ignoreFieldNorm = false
+
+[page]
+  [page.math]
+    enable = true
+    copyTex = true
+    mhchem = true
+
+  [page.code]
+    maxShownLines = 100
+
+  [page.comment]
+    enable = true
+    [page.comment.giscus]
+      enable = true
+      dataRepo = "iTwenty/personal-website"
+      dataRepoId = "MDEwOlJlcG9zaXRvcnkyNTQ3OTk5OTQ="
+      dataCategory = "Comments"
+      dataCategoryId = "DIC_kwDODy_wes4CWo-2"
+      dataMapping = "pathname"
+      dataReactionsEnabled = "1"
+      dataEmitMetadata = "0"
+      dataInputPosition = "bottom"
+      lightTheme = "light"
+      darkTheme = "dark_dimmed"
+      dataLang = "en"
+
+
+

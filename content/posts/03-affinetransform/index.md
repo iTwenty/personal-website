@@ -1,11 +1,9 @@
 ---
 title: "Visualizing CGAffineTransforms"
 summary: "Understand what linear and affine transforms mean. Visually."
-hideReadMore: true
 date: 2020-10-17T13:46:30+05:30
 draft: false
 tags: [ios, swift]
-GHIssueID: 5
 ---
 
 Lately I have been watching the excellent "[Essence of Linear Algebra](https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab)" video series by [3blue1brown](https://www.3blue1brown.com/). As an iOS developer, I was vaguely familiar with [CGAffineTransform](https://developer.apple.com/documentation/coregraphics/cgaffinetransform) and how it could be used to scale, rotate and shear UIViews. Watching 3b1b's series helped me understand the math behind it. This post is my attempt at explaining, and cementing my own understanding, of the concept.

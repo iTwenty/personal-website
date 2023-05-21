@@ -1,11 +1,9 @@
 ---
 title: "Create Android style navigation drawer in SwiftUI"
 summary: "Leverage the power to SwiftUI to create a navigation drawer."
-hideReadMore: true
 date: 2022-04-01T14:28:35+05:30
 draft: false
 tags: [ios, android, swiftui]
-GHIssueID: 7
 ---
 
 Android's Jetpack Compose has a nifty navigation drawer component that is useful for adding navigation to different sections of an app. iOS doesn't have any equivalent UI element, either in UIKit or in SwiftUI. However, the view is pretty easy to create in SwiftUI - and that is exactly what we will be doing over the course of two posts. This is going to be our end goal:
