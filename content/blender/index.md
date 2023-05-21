@@ -1,6 +1,8 @@
 ---
 title: "Blender Gallery"
 draft: false
+comment:
+    enable: false
 ---
 
 Some stuff created using [Blender](https://www.blender.org/).

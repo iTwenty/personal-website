@@ -1,5 +1,7 @@
 ---
 draft: false
+comment:
+    enable: false
 ---
 ## 👋 Hi, I'm Jaydeep Joshi
 

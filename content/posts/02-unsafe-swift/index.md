@@ -4,6 +4,7 @@ summary: "Learn how structs are laid out in memory, followed by a dive into the 
 date: 2020-08-16T19:46:16+05:30
 draft: false
 tags: [ios, swift]
+authors: [itwenty]
 ---
 
 ### What is Memory?

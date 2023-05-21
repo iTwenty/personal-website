@@ -4,6 +4,7 @@ summary: "Get familiar with collection protocols in Swift."
 date: 2021-10-02T14:10:04+05:30
 draft: false
 tags: [ios, swift]
+authors: [itwenty]
 ---
 
 If there's one aspect of Swift I avoided learning for the longest time, it would be the whole family of Collection types. The main reason is that the concrete implementations provided in the [standard library](https://developer.apple.com/documentation/swift/swift_standard_library/collections) - Arrays, Sets and Dictionaries - work fine for 99% of use cases. The other, more important reason - there's just too many damn protocols!

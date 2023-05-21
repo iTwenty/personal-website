@@ -1,6 +1,8 @@
 ---
 title: "Personal Projects"
 draft: false
+comment:
+    enable: false
 ---
 
 ---------
