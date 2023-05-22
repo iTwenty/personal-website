@@ -28,13 +28,6 @@ dateFormat = "Jan 02, 2006"
   [search.fuse]
     isCaseSensitive = false
     minMatchCharLength = 2
-    findAllMatches = false
-    location = 0
-    threshold = 0.3
-    distance = 100
-    ignoreLocation = false
-    useExtendedSearch = false
-    ignoreFieldNorm = false
 
 [page]
   [page.math]
