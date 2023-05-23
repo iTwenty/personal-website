@@ -1,8 +1,32 @@
 [build]
-publish = "public"
-command = "hugo --gc --minify"
+  publish = "public"
+  command = "hugo --gc --minify"
 
 [context.production.environment]
-HUGO_VERSION = "0.111.3"
-HUGO_ENV = "production"
-HUGO_ENABLEGITINFO = "true"
+  HUGO_VERSION = "0.111.3"
+  HUGO_ENV = "production"
+  HUGO_ENABLEGITINFO = "true"
+
+[[redirects]]
+  from = "/2020/07/understanding-dyld-executable_path-loader_path-and-rpath/"
+  to = "/posts/01-understanding-rpath/"
+
+[[redirects]]
+  from = "/2020/08/exploring-memory-layout-and-pointers-in-swift/"
+  to = "/posts/02-unsafe-swift/"
+
+[[redirects]]
+  from = "/2020/10/visualizing-cgaffinetransforms/"
+  to = "/posts/03-affinetransform/"
+
+[[redirects]]
+  from = "/2021/10/understanding-swifts-collection-protocols/"
+  to = "/posts/04-swift-collections/"
+
+[[redirects]]
+  from = "/2022/04/create-android-style-navigation-drawer-in-swiftui/"
+  to = "/posts/05-swiftui-drawerview-p1/"
+
+[[redirects]]
+  from = "/2022/04/drag-gestures-in-swiftui/"
+  to = "/posts/06-swiftui-drawerview-p2/"
