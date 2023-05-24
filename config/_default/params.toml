@@ -32,7 +32,7 @@ dateFormat = "Jan 02, 2006"
   Strava = "3777421"
 
 [search]
-  enable = true
+  enable = false
   type = "fuse"
   contentLength = 4000
   placeholder = ""
