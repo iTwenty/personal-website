@@ -81,7 +81,7 @@ dyld: Library not loaded: libCat.dylib
 
 We can change the relative install path `libCat.dylib` in `main` using a utility called `install_name_tool`[^install_name_tool]. But what should we change it to? We could change it to absolute path, and that would work on our system, but if you distribute `main` and `libCat.dylib` to someone else, it will likely fail on their system.
 
-Solution here is to use a special variable called `@executable_path`. When dyld encounters this variable at link time, it gets resolved to path of directory containing the executable. In my case since `main` is in `~/tests/blog/`, `@executable_path` resolves to `~/test/blog/`. Let's fix the install path using `install_name_tool` -
+Solution here is to use a special variable called `@executable_path`. When dyld encounters this variable at link time, it gets resolved to path of directory containing the executable. In my case since `main` is in `~/tests/blog/`, `@executable_path` resolves to `~/tests/blog/`. Let's fix the install path using `install_name_tool` -
 
 ```
 ❯❯❯❯ install_name_tool -change libCat.dylib @executable_path/libCat.dylib main
@@ -169,8 +169,8 @@ libCat.dylib <--- Animal/libAnimal.dylib <--- main
 
 | load        | @executable_path | @loader_path     |
 |---------------------|------------------|----------------------|
-| main -> libAnimal  | ~/tests/blog/  | ~/test/blog/     |
-| libAnimal -> libCat | ~/tests/blog/  | ~/test/blog/Animal/ |
+| main -> libAnimal  | ~/tests/blog/  | ~/tests/blog/     |
+| libAnimal -> libCat | ~/tests/blog/  | ~/tests/blog/Animal/ |
 
 Knowing this, we can now change the install path in Animal dylib from `libCat.dylib` to `@loader_path/../libCat.dylib`
 
@@ -242,7 +242,7 @@ For `main.c` this works out to `@loader_path`. We can use `install_name_tool` to
 clang -LAnimal -lAnimal -rpath "@loader_path" main.c -o main
 ```
 
-After these changes, we can move our `~/test/blog/` directory anywhere, even a different system, and the two executables will continue to run - as long as the directory structure within `~/tests/blog/` itself doesn't change.
+After these changes, we can move our `~/tests/blog/` directory anywhere, even a different system, and the two executables will continue to run - as long as the directory structure within `~/tests/blog/` itself doesn't change.
 
 Note that you can define more than one `@rpath` value for an executable, either at link time or later using `install_name_tool`. dyld will try all values in order to check for existence of dylibs.
 
