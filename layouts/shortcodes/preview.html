@@ -1,7 +1,11 @@
 <details>
     <summary style="font-size: larger; font-weight: bold;">{{ .Get "title" | default "Preview (tap to view)" }}</summary>
+    {{ if strings.ContainsNonSpace .Inner }}
     <div class="grid-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); grid-gap: 1em;">
         <pre class="language-swift" style="height: 100%;"><code class="language-swift" data-lang="swift">{{ .Inner | string }}</code></pre>
         <img style="margin: .5em 0;" src="{{ .Get "src" | safeURL }}" alt="Preview Image">
     </div>
+    {{ else }}
+    <img style="margin: .5em 0;" src="{{ .Get "src" | safeURL }}" alt="Preview Image">
+    {{ end }}
 </details>
