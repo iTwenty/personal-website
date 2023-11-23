@@ -7,7 +7,7 @@ tags: [ios, swiftui, music]
 authors: [itwenty]
 ---
 
-Being a huge Pink Floyd fan, I recently requested my wife, a budding painter, to paint the cover art for the band's most successful album - The Dark Side of the Moon. Here's what she came up with:
+Being a big Pink Floyd fan, I recently requested my wife, a budding painter, to paint the cover art for the band's most successful album - The Dark Side of the Moon. Here's what she came up with:
 
 {{< image src="dsotm_painting.jpg" alt="Dark Side of the Moon Painting" position="center" style="border-radius: 8px;" >}}
 
