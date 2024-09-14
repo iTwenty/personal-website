@@ -12,21 +12,25 @@ Those familiar with Jellyfin - or other media servers like Plex, Emby etc - will
 
 My movies were organized this way -
 
-    Highway
-    └── Highway (720p) (2014).mkv
-    Kingdom of Heaven
-    ├── Kingdom of Heaven (1080p) (2005) (Director's Cut).mp4
-    └── Kingdom of Heaven (1080p) (2005) (Director's Cut).srt
+```text
+Highway
+└── Highway (720p) (2014).mkv
+Kingdom of Heaven
+├── Kingdom of Heaven (1080p) (2005) (Director's Cut).mp4
+└── Kingdom of Heaven (1080p) (2005) (Director's Cut).srt
+```
 
 The first three fields - movie title, resolution and release year - are present for all movies. Extras like (Director's Cut) are optional fields that may or may not be present. [Jellyfin docs](https://jellyfin.org/docs/general/server/media/movies/) recommend movie title be immediately followed by release year. In my case, I guess the resolution field between title and year was causing Jellyfin to treat resolution as part of movie title, which was obviously not correct.
 
 The goal was simple - rename all files from current naming scheme to this one -
 
-    Highway
-    └── Highway (2014) (720p).mkv
-    Kingdom of Heaven
-    ├── Kingdom of Heaven (2005) (1080p) (Director's Cut).mp4
-    └── Kingdom of Heaven (2005) (1080p) (Director's Cut).srt
+```text
+Highway
+└── Highway (2014) (720p).mkv
+Kingdom of Heaven
+├── Kingdom of Heaven (2005) (1080p) (Director's Cut).mp4
+└── Kingdom of Heaven (2005) (1080p) (Director's Cut).srt
+```
 
  How to achieve this goal for over 400 files? Not so simple. I instinctively knew this task will need dabbling with regexes and capture groups. My initial idea was to whip up a quick python script. But this seemed like the sort of task that someone would have solved before me. So I set out to find a good readymade tool for mass renaming files with regex support.
 
@@ -56,16 +60,19 @@ It's strange how searching for "macOS bulk file rename" shows only GUI tools whe
 
 Now that I had seemingly found the perfect tool for the job, next task was conjuring a regex to match the original filenames. [regex101](https://regex101.com/) is super helpful here, as is rnr's dry run mode. Here's the regex I came up with -
 
-
-    (.*) (\(720p\)|\(1080p\)) (\([0-9]+\))
+```text
+(.*) (\(720p\)|\(1080p\)) (\([0-9]+\))
+```
 
 And here's the full command I used to rename -
 
-    rnr -rfD  '(.*) (\(HD\)|\(1080p\)) (\([0-9]+\))' '${1} ${3} ${2}' ./*
+```text
+rnr -rfD  '(.*) (\(HD\)|\(1080p\)) (\([0-9]+\))' '${1} ${3} ${2}' ./*
 
-    -r Recursive mode since actual movie files are inside sub-directories.
-    -f Perform the actual rename. rnr is dry run by default. So you need to pass this flag to actually make the changes.
-    -D Match and rename directories as well, along with files.
+-r Recursive mode since actual movie files are inside sub-directories.
+-f Perform the actual rename. rnr is dry run by default. So you need to pass this flag to actually make the changes.
+-D Match and rename directories as well, along with files.
+```
 
 The regex captures three groups from each matched filename - title, resolution and year. The replacement string `${1} ${3} ${2}` simply swaps the position of resolution and year in the matched name. The final `./*` tells rnr to include all directories recursively from the current directory.
 
