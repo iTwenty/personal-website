@@ -8,7 +8,7 @@ authors: [itwenty]
 ---
 If you have added any third party dynamic framework to an iOS app, you might have run into a cryptic error that reads something like:
 
-```text
+```text {header=false, lineNos=false}
 dyld: Library not loaded: @rpath/TestKit.framework/TestKit
  Referenced from: <long_path_name>/TestApp.app/TestApp
  Reason: image not found
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
 
 Compile `Cat.c` into a dylib and `main.c` into an executable.
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ clang -dynamiclib Cat.c -o libCat.dylib
 ❯❯❯❯ clang -L. -lCat main.c -o main
 ```
@@ -54,14 +54,14 @@ Here, `-L` stands for library search path. `-l` specifies the name of dylib to l
 
 Let's go ahead and run the `main` executable.
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ ./main
 MEOW!
 ```
 
 We get the cat sound, as expected. Let's inspect how the dylib has been linked to our executable. We can use `otool` for this task. The `-L` option prints paths to all dynamic libraries used by an executable. Let's call these paths install paths.
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ otool -L main
 main:
 	libCat.dylib (compatibility version 0.0.0, current version 0.0.0)
@@ -70,7 +70,7 @@ main:
 
 The first install path `libCat.dylib` is a relative path. This means our `main` executable expects to find `libCat.dylib` in same directory as it is executed from. If we try to run `main` from any other directory, we get an error.
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ cd ~/tests/
 ❯❯❯❯ ./blog/main
 dyld: Library not loaded: libCat.dylib
@@ -83,13 +83,13 @@ We can change the relative install path `libCat.dylib` in `main` using a utility
 
 Solution here is to use a special variable called `@executable_path`. When dyld encounters this variable at link time, it gets resolved to path of directory containing the executable. In my case since `main` is in `~/tests/blog/`, `@executable_path` resolves to `~/tests/blog/`. Let's fix the install path using `install_name_tool` -
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ install_name_tool -change libCat.dylib @executable_path/libCat.dylib main
 ```
 
 Let's run `main` from `~/tests/` directory again. 
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ cd ~/tests/
 ❯❯❯❯ ./blog/main
 MEOW!
@@ -111,7 +111,7 @@ void animalSound() {
 
 Compile `Animal/Animal.c` into a dylib. We will need to link it to `libCat.dylib`.
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ clang -dynamiclib -L. -lCat Animal/Animal.c -o Animal/libAnimal.dylib
 ```
 
@@ -126,19 +126,19 @@ int main(int argc, char** argv) {
 }
 ```
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ clang -LAnimal -lAnimal main.c -o main
 ```
 
 Just like before, we know that we can execute `main` from `~/tests/blog/`, but not from `~/tests` or any other directory. We also know the fix for this. So let's go ahead and do that.
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ install_name_tool -change Animal/libAnimal.dylib @executable_path/Animal/libAnimal.dylib main
 ```
 
 Running `main` from `~/tests/` fails this time though.
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ cd ~/tests/
 ❯❯❯❯ ./blog/main
 dyld: Library not loaded: libCat.dylib
@@ -149,7 +149,7 @@ dyld: Library not loaded: libCat.dylib
 
 The error tells us that `libAnimal` could not find `libCat`. Let's check the install paths for `libAnimal.dylib`
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ otool -L Animal/libAnimal.dylib
 Animal/libAnimal.dylib:
 	Animal/libAnimal.dylib (compatibility version 0.0.0, current version 0.0.0)
@@ -161,7 +161,7 @@ We need to fix the relative install path to `libCat.dylib` here. But what should
 
 Let's take a step back and look at the dependency tree we have. `main` depends on `libAnimal` and `libAnimal` depends on `libCat`. `libCat` doesn't depend on anything.[^libSystem]
 
-```text
+```text {header=false, lineNos=false}
 libCat.dylib <--- Animal/libAnimal.dylib <--- main
 ```
 
@@ -174,7 +174,7 @@ libCat.dylib <--- Animal/libAnimal.dylib <--- main
 
 Knowing this, we can now change the install path in Animal dylib from `libCat.dylib` to `@loader_path/../libCat.dylib`
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ install_name_tool -change libCat.dylib @loader_path/../libCat.dylib Animal/libAnimal.dylib
 ```
 
@@ -186,7 +186,7 @@ Running `main` will now succeed from any directory. In fact, if you were to add 
 
 Before moving on to `@rpath`, let's understand a small concept called install IDs. Check the `otool -L` output for any dylib
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ otool -L Animal/libAnimal.dylib
 	Animal/libAnimal.dylib (compatibility version 0.0.0, current version 0.0.0)
 	@loader_path/../libCat.dylib (compatibility version 0.0.0, current version 0.0.0)
@@ -201,7 +201,7 @@ In a large project with muliple clients in different locations depending on each
 
 Let's modify our test case to make use of `@rpath`. Add another executable `foo/main.c` with same source as `main.c`. We won't compile it yet. Our directory structure looks like this :
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ tree blog
 blog
 ├── Animal
@@ -220,11 +220,11 @@ First step is to pick a path as an anchor path in our directory structure. Let's
 Next, let's change the dylib install IDs to `@rpath/zzz` where zzz is relative path from anchor to the dylib.
 
 For `libCat.dylib` this works out to `@rpath/libCat.dylib`
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ install_name_tool -id @rpath/libCat.dylib libCat.dylib
 ```
 For `Animal/libAnimal.dylib` this works out to `@rpath/Animal/libAnimal.dylib`
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ install_name_tool -id @rpath/Animal/libAnimal.dylib Animal/libAnimal.dylib
 ```
 
@@ -232,13 +232,13 @@ Next, let's add an `@rpath` to our executables with value equal to `@loader_path
 
 For `foo/main.c` this works out to `@loader_path/../`
 
-```text
+```text {header=false, lineNos=false}
 ❯❯❯❯ clang -LAnimal -lAnimal -rpath "@loader_path/../" foo/main.c -o foo/main
 ```
 
 For `main.c` this works out to `@loader_path`. We can use `install_name_tool` to add `@rpath` to the compiled executable, but since the install IDs for `libAnimal` and `libCat` have changed after `main.c` was compiled, it's best to re-compile and re-link it so that it picks up the updated IDs.
 
-```text
+```text {header=false, lineNos=false}
 clang -LAnimal -lAnimal -rpath "@loader_path" main.c -o main
 ```
 
@@ -250,7 +250,7 @@ Note that you can define more than one `@rpath` value for an executable, either 
 
 Knowing all this, we are now in a far better position to understand what the initial error message means, and how to go about fixing it. Let's analyze the error -
 
-```text
+```text {header=false, lineNos=false}
 dyld: Library not loaded: @rpath/TestKit.framework/TestKit
  Referenced from: <long_path_name>/TestApp.app/TestApp
  Reason: image not found

@@ -12,7 +12,7 @@ Those familiar with Jellyfin - or other media servers like Plex, Emby etc - will
 
 My movies were organized this way -
 
-```text
+```text {header=false, lineNos=false}
 Highway
 └── Highway (720p) (2014).mkv
 Kingdom of Heaven
@@ -24,7 +24,7 @@ The first three fields - movie title, resolution and release year - are present 
 
 The goal was simple - rename all files from current naming scheme to this one -
 
-```text
+```text {header=false, lineNos=false}
 Highway
 └── Highway (2014) (720p).mkv
 Kingdom of Heaven
@@ -60,13 +60,13 @@ It's strange how searching for "macOS bulk file rename" shows only GUI tools whe
 
 Now that I had seemingly found the perfect tool for the job, next task was conjuring a regex to match the original filenames. [regex101](https://regex101.com/) is super helpful here, as is rnr's dry run mode. Here's the regex I came up with -
 
-```text
+```text {header=false, lineNos=false}
 (.*) (\(720p\)|\(1080p\)) (\([0-9]+\))
 ```
 
 And here's the full command I used to rename -
 
-```text
+```text {header=false, lineNos=false}
 rnr -rfD  '(.*) (\(HD\)|\(1080p\)) (\([0-9]+\))' '${1} ${3} ${2}' ./*
 
 -r Recursive mode since actual movie files are inside sub-directories.
