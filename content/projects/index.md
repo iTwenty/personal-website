@@ -2,7 +2,7 @@
 title: "Personal Projects"
 draft: false
 comment:
-    enable: false
+enable: false
 ---
 
 ---------
@@ -12,6 +12,7 @@ iOS app to merge Apple Health workouts. I have the habit of fat-fingering End bu
 
 More information can be found on the [main site](https://mergefit.itwenty.me).
 
+---------
 ## Brahmaand
 #### [GitHub](https://github.com/iTwenty/Brahmaand)
 iOS app to browse [APODs](https://apod.nasa.gov/). There are already dozens of similar apps in the App Store, but none that I tried provided support for browsing APODs with left/right swipes. This one does. As a bonus, it also allows you to mark APODs as favorites, which are displayed separately from daily APODs.
