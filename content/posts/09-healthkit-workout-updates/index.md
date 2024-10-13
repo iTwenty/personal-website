@@ -1,7 +1,8 @@
 ---
 title: "Read workouts using Healthkit - and keep them updated!"
+summary: "Learn how to read workouts data using Healthkit and keep the data synced with further updates."
 date: 2024-10-13T12:03:05+05:30
-draft: true
+draft: false
 tags: []
 authors: [itwenty]
 ---
