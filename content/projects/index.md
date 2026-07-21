@@ -10,7 +10,14 @@ enable: false
 ### [App Store](https://apps.apple.com/us/app/id6714483581)
 iOS app to merge Apple Health workouts. I have the habit of fat-fingering End button instead of Pause on my Apple Watch when I take a break during my runs. Starting another workout means my running stats are split across two separate workouts. Not ideal. I needed an easy way to merge such split workouts without losing any of the metrics recorded by the watch. MergeFit was born out of this need.
 
-More information can be found on the [main site](https://mergefit.itwenty.me).
+More information can be found on the [main site](https://mergefit.app).
+
+---------
+## KudoKit
+### [App Store](https://apps.apple.com/app/id6774253594)
+iOS app to merge Strava workouts. Same concept as MergeFit, but for Strava workouts instead of Apple Health workouts.
+
+More information can be found on the [main site](https://kudokit.app).
 
 ---------
 ## Brahmaand
